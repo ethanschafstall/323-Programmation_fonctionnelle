@@ -8,43 +8,49 @@ public class RecursiveFileProcessor
 {
     public static void Main(string[] args)
     {
-        foreach (string path in args)
+        var paths = new List<string>() { "C:\\Users\\po01imj\\Documents\\GitHub", "C:\\temp" };
+        int totalFiles = 0;
+        int totalDic = 0;
+        foreach (string path in paths)
         {
-            if (File.Exists(path))
+            if (Directory.Exists(path))
             {
                 // This path is a file
-                ProcessFile(path);
+                var count = ProcessDirectory(path);
+                totalFiles = count.Item1;
+                totalDic = count.Item2;
             }
-            else if (Directory.Exists(path))
-            {
-                // This path is a directory
-                ProcessDirectory(path);
-            }
-            else
-            {
-                Console.WriteLine("{0} is not a valid file or directory.", path);
-            }
+            Console.WriteLine($"{path} contient {totalFiles} fichiers et {totalDic} dossiers");
+
         }
+
     }
 
     // Process all files in the directory passed in, recurse on any directories
     // that are found, and process the files they contain.
-    public static void ProcessDirectory(string targetDirectory)
+    public static Tuple<int, int> ProcessDirectory(string targetDirectory)
     {
-        // Process the list of files found in the directory.
-        string[] fileEntries = Directory.GetFiles(targetDirectory);
-        foreach (string fileName in fileEntries)
-            ProcessFile(fileName);
+        
+        int files = 0;
+        int folders = 0;
 
-        // Recurse into subdirectories of this directory.
+        //Process the list of files found in the directory.
+        string[] fileEntries = Directory.GetFiles(targetDirectory);
+        foreach (string fileName in fileEntries) { 
+            files++;
+        }
+
+        //Recurse into subdirectories of this directory.
         string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
         foreach (string subdirectory in subdirectoryEntries)
-            ProcessDirectory(subdirectory);
-    }
+        {
+            folders++;
 
-    // Insert logic for processing found files here.
-    public static void ProcessFile(string path)
-    {
-        Console.WriteLine("Processed file '{0}'.", path);
+            (int fileNum, int folderNum) = ProcessDirectory(subdirectory);
+            files += fileNum;
+            folders += folders;
+        }
+
+        return Tuple.Create(files, folders);
     }
 }
